@@ -33,7 +33,7 @@ $container['db'] = function ($c) {
 $app->get('/users', Controller\UserController::class . ':all')->setName('users');
 $app->get('/user/{id}', Controller\UserController::class . ':findById');
 $app->get('/user/find/{user}', Controller\UserController::class . ':findByUser')->setName('findByUser');
-$app->post('/user/new', Controller\UserController::class . ':create');
+$app->post('/user', Controller\UserController::class . ':create');
 
 $app->get('/profiles', Controller\UserProfileController::class . ':all');
 $app->get('/profile/{id}', Controller\UserProfileController::class . ':findById');
