@@ -44,6 +44,11 @@ public function getPassword()
   return $this->password;
 }
 
+public function getDateCreated()
+{
+  return $this->dateCreated;
+}
+
 public function setId($id)
 {
   $this->id = $id;
@@ -62,12 +67,19 @@ public function setPassword($password)
   return $this;
 }
 
+public function setDateCreated($dateCreated)
+{
+  $this->dateCreated = $dateCreated;
+  return $this;
+}
+
 public function jsonSerialize()
 {
   return [
     'id' => $this->id,
     'user' => $this->user,
-    'password' => $this->password
+    'password' => $this->password,
+    'dateCreated' => $this->dateCreated
   ];
 }
 
