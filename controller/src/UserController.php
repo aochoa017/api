@@ -144,6 +144,41 @@ class UserController
     // return $response->withJson($user);
   }
 
+  public function update($request, $response, $args) {
+    $allPostPutVars = $request->getParsedBody();
+    // to access items in the container... $this->container->get('');
+    $sql = $this->db->prepare("UPDATE `users` SET `password`=? WHERE id = ". $args['id']);
+    $passwordValue = $allPostPutVars['password'];
+    // $responseUpdate['password'] = $passwordValue;
+    // $responseUpdate['passwordLeng'] = strlen($passwordValue);
+    if ( strlen($passwordValue) < 6 ) {
+      $responseUpdate['success'] = false;
+      $responseUpdate['message'] = "La contraeña tiene que tener al menos 6 caracteres";
+    } else {
+      try {
+        $this->db->beginTransaction();
+        // Update in Users table
+        $sql->execute([
+          $passwordValue
+        ]);
+        if( $sql->affected_rows >= 0 ){
+          $responseUpdate['success'] = true;
+          $responseUpdate['message'] = "Contraseña actualizada correctamente";
+        } else {
+          $responseUpdate['success'] = false;
+          $responseUpdate['message'] = "Error al cambiar la contraseña";
+        }
+        $this->db->commit();
+      } catch(PDOExecption $e) {
+        $this->db->rollback();
+        $responseUpdate['success'] = false;
+        $responseUpdate['message'] = "Error al cambiar la contraseña";
+        print "Error!: " . $e->getMessage() . "</br>";
+      }
+    }
+    return $response->withJson($responseUpdate);
+  }
+
   public function contact($request, $response, $args) {
     // your code
     // to access items in the container... $this->container->get('');
