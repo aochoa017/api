@@ -38,6 +38,7 @@ $app->put('/user/{id}', Controller\UserController::class . ':update');
 
 $app->get('/profiles', Controller\UserProfileController::class . ':all');
 $app->get('/profile/{id}', Controller\UserProfileController::class . ':findById');
+$app->put('/profile/{id}', Controller\UserProfileController::class . ':update');
 
 
 $app->get('/users1', function ($request, $response, $args) {
