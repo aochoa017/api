@@ -69,8 +69,8 @@ class UserController
     $user->setUser($result['user']);
     $user->setPassword($result['password']);
     $user->setDateCreated($result['dateCreated']);
-    // return $response->withJson($user);
-    return $user;
+    return $response->withJson($user);
+    // return $user;
   }
 
   public function create($request, $response, $args) {
