@@ -38,6 +38,7 @@ $app->put('/user/{id}', Controller\UserController::class . ':update');
 
 $app->get('/profiles', Controller\UserProfileController::class . ':all');
 $app->get('/profile/{id}', Controller\UserProfileController::class . ':findById');
+$app->get('/profile/find/{user}', Controller\UserProfileController::class . ':findByUser')->setName('findByUser');
 $app->put('/profile/{id}', Controller\UserProfileController::class . ':update');
 
 

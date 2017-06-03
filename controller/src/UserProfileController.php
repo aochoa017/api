@@ -73,6 +73,25 @@ class UserProfileController
     return $response->withJson($user);
   }
 
+  public function findByUser($request, $response, $args) {
+    $sql = $this->db->prepare("SELECT * FROM users JOIN profiles ON users.id = profiles.id WHERE users.user = '". $args['user'] ."'");
+    $sql->execute();
+    $result = $sql->fetch();
+    $user =  new UserProfileEntity($result['id']);
+    $user->setUser($result['user']);
+    $user->setName($result['name']);
+    $user->setSurname($result['surname']);
+    $user->setAdress($result['adress']);
+    $user->setCity($result['city']);
+    $user->setCountry($result['country']);
+    $user->setZipCode($result['zipCode']);
+    $user->setEmail($result['email']);
+    $user->setPhone($result['phone']);
+    $user->setBiography($result['biography']);
+    return $response->withJson($user);
+    // return $user;
+  }
+
   public function update($request, $response, $args) {
     $allPostPutVars = $request->getParsedBody();
 
