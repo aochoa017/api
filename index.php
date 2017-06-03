@@ -41,6 +41,8 @@ $app->get('/profile/{id}', Controller\UserProfileController::class . ':findById'
 $app->get('/profile/find/{user}', Controller\UserProfileController::class . ':findByUser')->setName('findByUser');
 $app->put('/profile/{id}', Controller\UserProfileController::class . ':update');
 
+$app->post('/login', Controller\LoginController::class . ':login');
+
 
 $app->get('/users1', function ($request, $response, $args) {
   $sql = $this->db->prepare("SELECT * FROM `users` WHERE id = 1");
