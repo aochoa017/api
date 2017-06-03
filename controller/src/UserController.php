@@ -73,9 +73,23 @@ class UserController
     // return $user;
   }
 
+  public function checkUser($request, $response, $args) {
+    // to access items in the container... $this->container->get('');
+    // print_r("llega2");
+    $sql = $this->db->prepare("SELECT * FROM `users` WHERE user = '". $args['user'] ."'");
+    $sql->execute();
+    $result = $sql->fetch();
+    $user =  new UserEntity($result['id']);
+    $user->setUser($result['user']);
+    $user->setPassword($result['password']);
+    $user->setDateCreated($result['dateCreated']);
+    // return $response->withJson($user);
+    return $user;
+  }
+
   public function create($request, $response, $args) {
     $allPostPutVars = $request->getParsedBody();
-    $user = $this->findByUser($request,$response,$allPostPutVars);
+    $user = $this->checkUser($request,$response,$allPostPutVars);
     $responseCreate = array();
     if ( is_null( $user->getUser() ) ) {
       $user = "No existe usuario: " . $allPostPutVars['user'];
@@ -91,11 +105,18 @@ class UserController
       $sql = $this->db->prepare("INSERT INTO `users`(user, password, dateCreated) VALUES (?,?,?)");
       $userValue = $allPostPutVars['user'];
       $passwordValue = $allPostPutVars['password'];
-      $dateCreatedValue = "2017-12-05";
+      $dateCreatedValue = date("Y-m-d H:i:s");
 
-      $sql2 = $this->db->prepare("INSERT INTO `profiles`(`id`, `email`, `phone`) VALUES (?,?,?)");
+      $sql2 = $this->db->prepare("INSERT INTO `profiles`(`id`, `name`, `surname`, `adress`, `city`, `country`, `zipCode`, `email`, `phone`, `biography`) VALUES (?,?,?,?,?,?,?,?,?,?)");
+      $nameValue = $allPostPutVars['name'];
+      $surnameValue = $allPostPutVars['surname'];
+      $adressValue = $allPostPutVars['adress'];
+      $cityValue = $allPostPutVars['city'];
+      $countryValue = $allPostPutVars['country'];
+      $zipCodeValue = $allPostPutVars['zipCode'];
       $emailValue = $allPostPutVars['email'];
       $phoneValue = $allPostPutVars['phone'];
+      $biographyValue = $allPostPutVars['biography'];
 
       try {
         $this->db->beginTransaction();
@@ -110,14 +131,27 @@ class UserController
         // Save in Profile table
         $sql2->execute([
           $lastInsertId,
+          $nameValue,
+          $surnameValue,
+          $adressValue,
+          $cityValue,
+          $countryValue,
+          $zipCodeValue,
           $emailValue,
-          $phoneValue
+          $phoneValue,
+          $biographyValue
         ]);
         $userNew->setUser( $userValue );
         $userNew->setPassword( $passwordValue );
         $userNew->setDateCreated( $dateCreatedValue );
+        $userNew->setName( $nameValue );
+        $userNew->setSurname( $surnameValue );
+        $userNew->setAdress( $adressValue );
+        $userNew->setCity( $cityValue );
+        $userNew->setZipCode( $zipCodeValue );
         $userNew->setEmail( $emailValue );
         $userNew->setPhone( $phoneValue );
+        $userNew->setBiography( $biographyValue );
 
         $this->db->commit();
         $responseCreate['user'] = $userNew;
