@@ -7,5 +7,5 @@ para servir las peticiones necesarias para todo el desarrollo de la aplicación.
 
 Endpoint | Métodp | Descripción
 --- | --- | ---
-*/users* | GET | Lista todos los usuarios
+**`/users`** | GET | Lista todos los usuarios
 /user/{id} | GET | Lista el usuario con id = {id}
