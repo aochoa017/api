@@ -22,6 +22,8 @@ final class UserProfileEntity extends UserEntity
 
   private $biography;
 
+  private $avatar;
+
 
   /*
   * Getters
@@ -69,6 +71,11 @@ final class UserProfileEntity extends UserEntity
   public function getBiography()
   {
     return $this->biography;
+  }
+
+  public function getAvatar()
+  {
+    return $this->avatar;
   }
 
   /*
@@ -129,6 +136,12 @@ final class UserProfileEntity extends UserEntity
     return $this;
   }
 
+  public function setAvatar($avatar)
+  {
+    $this->avatar = $avatar;
+    return $this;
+  }
+
   public function jsonSerialize()
   {
     return [
@@ -142,7 +155,8 @@ final class UserProfileEntity extends UserEntity
       'zipCode' => $this->zipCode,
       'email' => $this->email,
       'phone' => $this->phone,
-      'biography' => $this->biography
+      'biography' => $this->biography,
+      'avatar' => $this->avatar
     ];
   }
 
