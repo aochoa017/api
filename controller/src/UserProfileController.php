@@ -247,6 +247,7 @@ class UserProfileController
           if( $sql->affected_rows >= 0 ){
             $fileAvatar->moveTo($target_file);
             $responseUpload['success'] = true;
+            $responseUpload['fileName'] = $newFileAvatarNameComplete;
             $responseUpload['message'] = "Avatar nuevo subido correctamente";
           } else {
             $responseUpload['success'] = false;
