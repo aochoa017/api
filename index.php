@@ -35,6 +35,7 @@ $app->get('/user/{id}', Controller\UserController::class . ':findById');
 $app->get('/user/find/{user}', Controller\UserController::class . ':findByUser')->setName('findByUser');
 $app->post('/user', Controller\UserController::class . ':create');
 $app->put('/user/{id}', Controller\UserController::class . ':update');
+$app->delete('/user/{id}', Controller\UserController::class . ':delete');
 
 $app->get('/profiles', Controller\UserProfileController::class . ':all');
 $app->get('/profile/{id}', Controller\UserProfileController::class . ':findById');

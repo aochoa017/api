@@ -213,4 +213,51 @@ class UserController
     return $response->withJson($responseUpdate);
   }
   
+  public function delete($request, $response, $args) {
+    
+    $sql = $this->db->prepare("SELECT * FROM `users` WHERE id = ". $args['id']);
+    $sql->execute();
+    $result = $sql->fetch();
+    $user =  new UserEntity($result['id']);
+    $user->setUser($result['user']);
+    $user->setPassword($result['password']);
+    $user->setDateCreated($result['dateCreated']);
+    
+    // return  $response->withJson($user);
+    $responseDelete = array();
+    if ( is_null( $user->getUser() ) ) {
+      $responseDelete['message'] = "No existe usuario: " . $args['id'];
+      $responseDelete['success'] = false;
+      $responseDelete['user'] = $user;
+    } else {
+      $responseDelete['success'] = true;
+      $responseDelete['user'] = $user;
+    }
+
+    if ( $responseDelete['success'] ) {
+      $sql = $this->db->prepare("DELETE FROM `users` WHERE id = ?");
+      try {
+        $this->db->beginTransaction();
+        // Update in Users table
+        $sql->execute([
+          $user->getId()
+        ]);
+        if( $sql->affected_rows >= 0 ){
+          $responseDelete['success'] = true;
+          $responseDelete['message'] = "Usuario eliminado correctamente";
+        } else {
+          $responseDelete['success'] = false;
+          $responseDelete['message'] = "Error al eliminar usuario";
+        }
+        $this->db->commit();
+      } catch(PDOExecption $e) {
+        $this->db->rollback();
+        $responseDelete['success'] = false;
+        $responseDelete['message'] = "Error al eliminar usuario";
+        // print "Error!: " . $e->getMessage() . "</br>";
+      }
+    }
+    return $response->withJson($responseDelete);
+  }
+  
 }
