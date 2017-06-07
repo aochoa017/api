@@ -108,15 +108,15 @@ class UserController
       $dateCreatedValue = date("Y-m-d H:i:s");
 
       $sql2 = $this->db->prepare("INSERT INTO `profiles`(`id`, `name`, `surname`, `adress`, `city`, `country`, `zipCode`, `email`, `phone`, `biography`) VALUES (?,?,?,?,?,?,?,?,?,?)");
-      $nameValue = $allPostPutVars['name'];
-      $surnameValue = $allPostPutVars['surname'];
-      $adressValue = $allPostPutVars['adress'];
-      $cityValue = $allPostPutVars['city'];
-      $countryValue = $allPostPutVars['country'];
-      $zipCodeValue = $allPostPutVars['zipCode'];
-      $emailValue = $allPostPutVars['email'];
-      $phoneValue = $allPostPutVars['phone'];
-      $biographyValue = $allPostPutVars['biography'];
+      $nameValue = $allPostPutVars['name'] ?: "";
+      $surnameValue = $allPostPutVars['surname'] ?: "";
+      $adressValue = $allPostPutVars['adress'] ?: "";
+      $cityValue = $allPostPutVars['city'] ?: "";
+      $countryValue = $allPostPutVars['country'] ?: "";
+      $zipCodeValue = $allPostPutVars['zipCode'] ?: "";
+      $emailValue = $allPostPutVars['email'] ?: "";
+      $phoneValue = $allPostPutVars['phone'] ?: "";
+      $biographyValue = $allPostPutVars['biography'] ?: "";
 
       try {
         $this->db->beginTransaction();
@@ -212,10 +212,5 @@ class UserController
     }
     return $response->withJson($responseUpdate);
   }
-
-  public function contact($request, $response, $args) {
-    // your code
-    // to access items in the container... $this->container->get('');
-    return $response;
-  }
+  
 }
