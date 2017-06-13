@@ -2,8 +2,13 @@
 
 require 'vendor/autoload.php';
 
-// use User\Service\UserEntity;
-
+use Chadicus\Books\FileRepository;
+use Chadicus\Slim\OAuth2\Routes;
+use Chadicus\Slim\OAuth2\Middleware;
+use Slim\Http;
+use Slim\Views;
+use OAuth2\Storage;
+use OAuth2\GrantType;
 
 $config = require_once('config/database.php');
 $app = new Slim\App($config);
@@ -24,13 +29,23 @@ $container['db'] = function ($c) {
     return $pdo;
 };
 
-// $container['UserController'] = function($c) {
-//     // $view = $c->get("view"); // retrieve the 'view' from the container
-//     return new UserController($c);
-// };
+$storage = new Storage\Pdo($container['db']);
 
-// $app = new Slim\App();
-$app->get('/users', Controller\UserController::class . ':all')->setName('users');
+$server = new OAuth2\Server(
+    $storage,
+    [
+        'access_lifetime' => 10,
+    ],
+    [
+        new GrantType\ClientCredentials($storage),
+        new GrantType\AuthorizationCode($storage),
+    ]
+);
+
+$app->post(Routes\Token::ROUTE, new Routes\Token($server))->setName('token');
+$authorization = new Middleware\Authorization($server, $app->getContainer());
+
+$app->get('/users', Controller\UserController::class . ':all')->setName('users')->add($authorization);
 $app->get('/user/{id}', Controller\UserController::class . ':findById');
 $app->get('/user/find/{user}', Controller\UserController::class . ':findByUser')->setName('findByUser');
 $app->post('/user', Controller\UserController::class . ':create');
