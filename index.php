@@ -1,6 +1,7 @@
 <?php
 
 require 'vendor/autoload.php';
+require 'config/constans.php';
 
 use Chadicus\Books\FileRepository;
 use Chadicus\Slim\OAuth2\Routes;

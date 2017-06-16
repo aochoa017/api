@@ -11,8 +11,8 @@ class CurlRequest{
   );
 
   protected $context_options = array(
-    CURLOPT_PORT => "8888",
-    CURLOPT_URL => "http://localhost:8888/api/token",
+    CURLOPT_PORT => PORT,
+    // CURLOPT_URL => "http://localhost:8888/api/token",
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_ENCODING => "",
     CURLOPT_MAXREDIRS => 10,

@@ -43,6 +43,7 @@ class LoginController
       $curlRequest = new CurlRequest();
       $curlRequest->addContextOption(CURLOPT_POSTFIELDS, json_encode($postFields));
       $curlRequest->addContextOption(CURLOPT_CUSTOMREQUEST, "POST");
+      $curlRequest->addContextOption(CURLOPT_URL, URL_BASE.$path);
       $curlResponse = $curlRequest->sendCurlRequest();
 
       if ( $curlResponse['success'] ) {
