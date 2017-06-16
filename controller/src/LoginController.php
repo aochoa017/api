@@ -5,6 +5,7 @@ namespace Controller;
 use \Interop\Container\ContainerInterface as ContainerInterface;
 use Service\UserEntity;
 use Service\UserProfileEntity;
+use Service\CurlRequest;
 
 class LoginController
 {
@@ -21,32 +22,57 @@ class LoginController
     $allPostPutVars = $request->getParsedBody();
     $userPost = $allPostPutVars['user'];
     $passwordPost = $allPostPutVars['password'];
-    // return $response->withJson($allPostPutVars);
-    $sql = $this->db->prepare("SELECT * FROM users JOIN profiles ON users.id = profiles.id WHERE users.user = '" .$userPost. "'");
+
+    $sql = $this->db->prepare("SELECT * FROM users JOIN profiles ON users.id = profiles.id WHERE users.user = '" .$userPost. "' AND users.password = '" .$passwordPost. "' ");
     $sql->execute();
-    $result = $sql->fetch();
+    $resultAll = $sql->fetchAll();
+    $result = $resultAll[0];
 
-    $user =  new UserEntity($result['id']);
-    $user->setUser($result['user']);
-    $user->setPassword($result['password']);
+    $responseLogin = Array();
 
-    if ( !is_null( $user->getUser() ) && $passwordPost == $user->getPassword() ) {
-      $userProfile =  new UserProfileEntity($result['id']);
-      $userProfile->setUser($result['user']);
-      $userProfile->setName($result['name']);
-      $userProfile->setSurname($result['surname']);
-      $userProfile->setAdress($result['adress']);
-      $userProfile->setCity($result['city']);
-      $userProfile->setCountry($result['country']);
-      $userProfile->setZipCode($result['zipCode']);
-      $userProfile->setEmail($result['email']);
-      $userProfile->setPhone($result['phone']);
-      $userProfile->setBiography($result['biography']);
+    if ( count($resultAll) == 1 ) {
+
+      $path = $this->container->get('router')->pathFor('token');
+
+      $postFields = array(
+      	"client_id" => "librarian",
+      	"client_secret" => "secret",
+      	"grant_type" => "client_credentials"
+      );
+
+      $curlRequest = new CurlRequest();
+      $curlRequest->addContextOption(CURLOPT_POSTFIELDS, json_encode($postFields));
+      $curlRequest->addContextOption(CURLOPT_CUSTOMREQUEST, "POST");
+      $curlResponse = $curlRequest->sendCurlRequest();
+
+      if ( $curlResponse['success'] ) {
+
+        $userProfile =  new UserProfileEntity($result['id']);
+        $userProfile->setUser($result['user']);
+        $userProfile->setName($result['name']);
+        $userProfile->setSurname($result['surname']);
+        $userProfile->setAdress($result['adress']);
+        $userProfile->setCity($result['city']);
+        $userProfile->setCountry($result['country']);
+        $userProfile->setZipCode($result['zipCode']);
+        $userProfile->setEmail($result['email']);
+        $userProfile->setPhone($result['phone']);
+        $userProfile->setBiography($result['biography']);
+        $userProfile->setAvatar($result['avatar']);
+
+        $responseLogin['success'] = $curlResponse['success'];
+        $responseLogin['token'] = $curlResponse['response'];
+        $responseLogin['user'] = $userProfile;
+      } else {
+        $responseLogin['success'] = false;
+        $responseLogin['error'] = "Algo ha ido mal con el endpoint del token";
+      }
     } else {
-      $userProfile = new UserProfileEntity;
+      $responseLogin['success'] = false;
+      $responseLogin['error'] = "Usuario y/o contraseña erroneos";
     }
 
-    return $response->withJson($userProfile);
+    return $response->withJson($responseLogin);
   }
 
 }
