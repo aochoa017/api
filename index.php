@@ -35,7 +35,7 @@ $storage = new Storage\Pdo($container['db']);
 $server = new OAuth2\Server(
     $storage,
     [
-        'access_lifetime' => 10,
+        'access_lifetime' => 86400,// 900 = 15 minutos
     ],
     [
         new GrantType\ClientCredentials($storage),
@@ -53,7 +53,7 @@ $app->post('/user', Controller\UserController::class . ':create');
 $app->put('/user/{id}', Controller\UserController::class . ':update');
 $app->delete('/user/{id}', Controller\UserController::class . ':delete');
 
-$app->get('/profiles', Controller\UserProfileController::class . ':all')->setName('profiles');
+$app->get('/profiles', Controller\UserProfileController::class . ':all')->setName('profiles')->add($authorization);
 $app->get('/profile/{id}', Controller\UserProfileController::class . ':findById');
 $app->get('/profile/find/{user}', Controller\UserProfileController::class . ':findByUser')->setName('findByUser');
 $app->put('/profile/{id}', Controller\UserProfileController::class . ':update');
@@ -61,6 +61,12 @@ $app->post('/profile/avatar/{id}', Controller\UserProfileController::class . ':a
 
 $app->post('/login', Controller\LoginController::class . ':login');
 
+$app->get('/contacts/{id}', Controller\ContactController::class . ':getContacts');
+$app->get('/contacts/requests/{id}', Controller\ContactController::class . ':getRequest');
+$app->get('/contacts/petitions/{id}', Controller\ContactController::class . ':getPetition');
+$app->put('/contacts/{id}', Controller\ContactController::class . ':update');
+$app->post('/contacts/accept/{id}', Controller\ContactController::class . ':acceptContact');
+$app->delete('/contacts/{id}', Controller\ContactController::class . ':delete');
 
 $app->get('/users1', function ($request, $response, $args) {
   $sql = $this->db->prepare("SELECT * FROM `users` WHERE id = 1");
