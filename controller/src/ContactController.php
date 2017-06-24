@@ -62,7 +62,7 @@ class ContactController
     return $result;
   }
 
-  private function updateContactsArrayById($table,$column,$id,$contactsRequest,$userId) {print_r("UPDATEllega ");
+  private function updateContactsArrayById($table,$column,$id,$contactsRequest,$userId) {
     $sql = $this->db->prepare("UPDATE `$table` SET `$column`=? WHERE id = ". $id);
     $isIdExist = false;
     for ($i=0; $i < count($contactsRequest); $i++) {
@@ -156,7 +156,7 @@ class ContactController
             $responseUpdate['message'] = "Error al agregar el contacto";
           }
           $this->db->commit();
-        } catch(PDOExecption $e) {print_r("paso error ");
+        } catch(PDOExecption $e) {
           $this->db->rollback();
           $responseUpdate['success'] = false;
           $responseUpdate['message'] = "Error al agregar el contacto: ".$e->getMessage();
@@ -196,10 +196,12 @@ class ContactController
     $userPetition =  new UserEntity($myIdUser);
     $userPetition->setUser($allPostPutVars['user']);
 
-    //Verificamos si ya esta en nuestros contactos
+    //Verificamos si ya esta en nuestros contactos y en nestra contactsPetitions
     $myContacts = $this->getContactsArrayById("contacts","contacts",$myIdUser);
     $isIdExist = $this->isValueInKeyListArray($myContacts,id,$idUserGoingPetition);
-    if ( !$isIdExist ) {
+    $myContactsPetitions = $this->getContactsArrayById("contacts","contactsPetitions",$myIdUser);
+    $isIdExist2 = $this->isValueInKeyListArray($myContactsPetitions,id,$idUserGoingPetition);
+    if ( !$isIdExist && !$isIdExist2 ) {
 
       $contactsRequest = $this->getContactsArrayById("contacts","contactsPetitions",$myIdUser);
       $contactsPetition = $this->getContactsArrayById("contacts","contactsRequest",$userRequest->getId());
@@ -227,7 +229,12 @@ class ContactController
     } else {
       //Ya tengo al contacto
       $responseUpdate['success'] = false;
-      $responseUpdate['message'] = "El contacto ya está agregado";
+      if ($isIdExist2) {
+      $responseUpdate['message'] = "El contacto está pendiente de aceptar la solicitud";
+      }
+      else {
+        $responseUpdate['message'] = "El contacto ya está agregado";
+      }
     }
 
     return $response->withJson($responseUpdate);
