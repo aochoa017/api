@@ -73,31 +73,30 @@ class UserController
     // return $user;
   }
 
-  public function checkUser($request, $response, $args) {
-    // to access items in the container... $this->container->get('');
-    // print_r("llega2");
-    $sql = $this->db->prepare("SELECT * FROM `users` WHERE user = '". $args['user'] ."'");
+  public function columnExist($table,$column,$value) {
+    $sql = $this->db->prepare("SELECT $column FROM `$table` WHERE ".$column." = '". $value ."'");
     $sql->execute();
     $result = $sql->fetch();
-    $user =  new UserEntity($result['id']);
-    $user->setUser($result['user']);
-    $user->setPassword($result['password']);
-    $user->setDateCreated($result['dateCreated']);
-    // return $response->withJson($user);
-    return $user;
+    if (!$result) {
+      $result = false;
+    } else {
+      $result = true;
+    }
+    return $result;
   }
 
   public function create($request, $response, $args) {
     $allPostPutVars = $request->getParsedBody();
-    $user = $this->checkUser($request,$response,$allPostPutVars);
     $responseCreate = array();
-    if ( is_null( $user->getUser() ) ) {
-      $user = "No existe usuario: " . $allPostPutVars['user'];
-      $responseCreate['success'] = true;
-    } else {
+    if ( $this->columnExist(profiles,email,$allPostPutVars['email']) ) {
+      $responseCreate['success'] = false;
+      $responseCreate['message'] = "El email asociado ya existe";
+    } elseif ( $this->columnExist(users,user,$allPostPutVars['user']) ) {
       $responseCreate['success'] = false;
       $responseCreate['message'] = "El usuario ya existe";
-      $responseCreate['user'] = $user;
+    } else {
+      $user = "No existe usuario: " . $allPostPutVars['user'];
+      $responseCreate['success'] = true;
     }
 
     if ( $responseCreate['success'] ) {
