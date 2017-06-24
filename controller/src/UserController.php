@@ -118,6 +118,8 @@ class UserController
       $phoneValue = $allPostPutVars['phone'] ?: "";
       $biographyValue = $allPostPutVars['biography'] ?: "";
 
+      $sql3 = $this->db->prepare("INSERT INTO `contacts`(id) VALUES (?)");
+
       try {
         $this->db->beginTransaction();
         // Save in Users table
@@ -140,6 +142,10 @@ class UserController
           $emailValue,
           $phoneValue,
           $biographyValue
+        ]);
+        // Save in Contacts table
+        $sql3->execute([
+          $lastInsertId
         ]);
         $userNew->setUser( $userValue );
         $userNew->setPassword( $passwordValue );
@@ -212,9 +218,9 @@ class UserController
     }
     return $response->withJson($responseUpdate);
   }
-  
+
   public function delete($request, $response, $args) {
-    
+
     $sql = $this->db->prepare("SELECT * FROM `users` WHERE id = ". $args['id']);
     $sql->execute();
     $result = $sql->fetch();
@@ -222,7 +228,7 @@ class UserController
     $user->setUser($result['user']);
     $user->setPassword($result['password']);
     $user->setDateCreated($result['dateCreated']);
-    
+
     // return  $response->withJson($user);
     $responseDelete = array();
     if ( is_null( $user->getUser() ) ) {
@@ -259,5 +265,5 @@ class UserController
     }
     return $response->withJson($responseDelete);
   }
-  
+
 }

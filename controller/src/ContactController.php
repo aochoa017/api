@@ -73,8 +73,7 @@ class ContactController
     }
     if (!$isIdExist) {
       array_push($contactsRequest, array(
-        "id" => $userId,
-        "user" => $userId
+        "id" => $userId
       ) );
     }
 
@@ -123,7 +122,7 @@ class ContactController
     $contactsRequest = $this->getContactsArrayById("contacts","contactsRequest",$myIdUser);
     $isIdExist = $this->isValueInKeyListArray($contactsRequest,id,$idUserGoingAccept);
 
-    if ($isIdExist) {print_r("paso 2 ");
+    if ($isIdExist) {
 
       // Checking if in other user is myIdUser in contactsPetitions column from contacts table
       $contactsPetitions = $this->getContactsArrayById("contacts","contactsPetitions",$idUserGoingAccept);
