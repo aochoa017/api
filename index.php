@@ -1,5 +1,6 @@
 <?php
-
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 require 'vendor/autoload.php';
 require 'config/constans.php';
 
@@ -44,6 +45,7 @@ $server = new OAuth2\Server(
 );
 
 $app->post(Routes\Token::ROUTE, new Routes\Token($server))->setName('token');
+$app->post(Controller\Authorize::ROUTE, new Controller\Authorize($server,null))->setName('authorize');
 $authorization = new Middleware\Authorization($server, $app->getContainer());
 
 $app->get('/users', Controller\UserController::class . ':all')->setName('users')->add($authorization);
