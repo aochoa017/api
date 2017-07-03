@@ -32,12 +32,22 @@ class LoginController
 
     if ( count($resultAll) == 1 ) {
 
-      $path = $this->container->get('router')->pathFor('token');
+      // $path = $this->container->get('router')->pathFor('token');
+      $path = $this->container->get('router')->pathFor('authorize');
 
+      // $postFields = array(
+      //   "user_id" => $result['id'],
+      // 	"client_id" => "librarian",
+      // 	"client_secret" => "secret",
+      // 	"grant_type" => "client_credentials"
+      // );
       $postFields = array(
-      	"client_id" => "librarian",
+        "client_id" => "social",
+        "user_id" => $result['id'],
       	"client_secret" => "secret",
-      	"grant_type" => "client_credentials"
+        "response_type" => "code",
+        "authorized" => "yes",
+        "state" => "xyz"
       );
 
       $curlRequest = new CurlRequest();
