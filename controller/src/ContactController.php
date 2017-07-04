@@ -146,7 +146,7 @@ class ContactController
           $himSql2 = $this->deleteContactsArrayById("contacts","contactsRequest",$myIdUser,$myContactsRequest,$idUserGoingAccept);
           $meSql2 = $this->deleteContactsArrayById("contacts","contactsPetitions",$idUserGoingAccept,$hisContactsPetitions,$myIdUser);
 
-          if( $meSql->affected_rows >= 0 && $himSql->affected_rows >= 0 && $meSql2->affected_rows >= 0 && $himSql2->affected_rows >= 0 ){
+          if( $meSql->rowCount() >= 0 && $himSql->rowCount() >= 0 && $meSql2->rowCount() >= 0 && $himSql2->rowCount() >= 0 ){
             $responseUpdate['success'] = true;
             $responseUpdate['message'] = "Contacto agregado correctamente";
             $responseUpdate['contacts'] = $myContacts;
@@ -211,7 +211,7 @@ class ContactController
         $sql = $this->updateContactsArrayById("contacts","contactsPetitions",$myIdUser,$contactsRequest,$userRequest->getId());
         $sql2 = $this->updateContactsArrayById("contacts","contactsRequest",$userRequest->getId(),$contactsPetition,$userPetition->getId());
 
-        if( $sql->affected_rows >= 0 && $sql2->affected_rows >= 0 ){
+        if( $sql->rowCount() >= 0 && $sql2->rowCount() >= 0 ){
           $responseUpdate['success'] = true;
           $responseUpdate['message'] = "Petición realizada correctamente";
         } else {
@@ -257,7 +257,7 @@ class ContactController
         $sql = $this->deleteContactsArrayById("contacts","contacts",$myIdUser,$myContacts,$idUserGoingDelete);
         $sql2 = $this->deleteContactsArrayById("contacts","contacts",$idUserGoingDelete,$hisContacts,$myIdUser);
 
-        if( $sql->affected_rows >= 0 && $sql2->affected_rows >= 0 ){
+        if( $sql->rowCount() >= 0 && $sql2->rowCount() >= 0 ){
           $responseUpdate['success'] = true;
           $responseUpdate['message'] = "Se ha eliminado al contacto correctamente";
         } else {

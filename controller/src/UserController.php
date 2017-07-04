@@ -200,7 +200,7 @@ class UserController
         $sql->execute([
           $passwordValue
         ]);
-        if( $sql->affected_rows >= 0 ){
+        if( $sql->rowCount() >= 0 ){
           $responseUpdate['success'] = true;
           $responseUpdate['message'] = "Contraseña actualizada correctamente";
         } else {
@@ -247,7 +247,7 @@ class UserController
         $sql->execute([
           $user->getId()
         ]);
-        if( $sql->affected_rows >= 0 ){
+        if( $sql->rowCount() >= 0 ){
           $responseDelete['success'] = true;
           $responseDelete['message'] = "Usuario eliminado correctamente";
         } else {

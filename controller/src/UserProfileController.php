@@ -153,7 +153,7 @@ class UserProfileController
             $phoneValue,
             $biographyValue
           ]);
-          if( $sql->affected_rows >= 0 ){
+          if( $sql->rowCount() >= 0 ){
             $responseUpdate['success'] = true;
             $responseUpdate['message'] = "Perfil actualizado correctamente";
             $responseUpdate['userProfile'] = $user;
@@ -259,7 +259,7 @@ class UserProfileController
           $sql->execute([
             $newFileAvatarNameComplete
           ]);
-          if( $sql->affected_rows >= 0 ){
+          if( $sql->rowCount() >= 0 ){
             $fileAvatar->moveTo($target_file);
             $responseUpload['success'] = true;
             $responseUpload['fileName'] = $newFileAvatarNameComplete;
