@@ -34,6 +34,7 @@ class LoginController
 
       // $path = $this->container->get('router')->pathFor('token');
       $path = $this->container->get('router')->pathFor('authorize');
+      $path .= "?user_id=".$result['id'];
 
       // $postFields = array(
       //   "user_id" => $result['id'],
@@ -46,6 +47,7 @@ class LoginController
         "user_id" => $result['id'],
       	"client_secret" => "secret",
         "response_type" => "code",
+        // "scope" => "bookCreate2",
         "authorized" => "yes",
         "state" => "xyz"
       );
@@ -72,7 +74,7 @@ class LoginController
         $userProfile->setAvatar($result['avatar']);
 
         $responseLogin['success'] = $curlResponse['success'];
-        $responseLogin['token'] = $curlResponse['response'];
+        $responseLogin['token'] = $curlResponse['response']->response;
         $responseLogin['user'] = $userProfile;
       } else {
         $responseLogin['success'] = false;
