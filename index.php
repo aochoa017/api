@@ -61,7 +61,7 @@ $app->delete('/user/{id}', Controller\UserController::class . ':delete');
 $app->get('/profiles', Controller\UserProfileController::class . ':all')->setName('profiles')->add($authorization);
 $app->get('/profile/{id}', Controller\UserProfileController::class . ':findById');
 $app->get('/profile/find/{user}', Controller\UserProfileController::class . ':findByUser')->setName('findByUser');
-$app->put('/profile/{id}', Controller\UserProfileController::class . ':update');
+$app->put('/profile/{id}', Controller\UserProfileController::class . ':update')->add($authorization);
 $app->post('/profile/avatar/{id}', Controller\UserProfileController::class . ':avatar');
 
 $app->post('/login', Controller\LoginController::class . ':login');

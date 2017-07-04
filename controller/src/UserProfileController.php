@@ -10,11 +10,13 @@ class UserProfileController
 {
   protected $container;
   protected $db;
+  protected $oauth2;
 
   // constructor receives container instance
   public function __construct(ContainerInterface $container) {
     $this->container = $container;
     $this->db = $this->container->db;
+    $this->oauth2 = new Oauth2($container);
   }
 
   //  public function __invoke($request, $response, $args) {
@@ -96,71 +98,84 @@ class UserProfileController
   }
 
   public function update($request, $response, $args) {
-    $allPostPutVars = $request->getParsedBody();
 
-    $sql = $this->db->prepare("SELECT users.id,users.user,profiles.avatar FROM users JOIN profiles ON users.id = profiles.id WHERE users.id = ". $args['id']);
-    $sql->execute();
-    $result = $sql->fetch();
+    $accessTokenHeader = $request->getHeaderLine('Authorization');
+    $accessTokenId = $this->oauth2->userIdAccessTokenFromHeader($accessTokenHeader);
 
-    $user =  new UserProfileEntity($result['id']);
-    $user->setUser($result['user']);
-    $user->setName($allPostPutVars['name']);
-    $user->setSurname($allPostPutVars['surname']);
-    $user->setAdress($allPostPutVars['adress']);
-    $user->setCity($allPostPutVars['city']);
-    $user->setCountry($allPostPutVars['country']);
-    $user->setZipCode($allPostPutVars['zipCode']);
-    $user->setEmail($allPostPutVars['email']);
-    $user->setPhone($allPostPutVars['phone']);
-    $user->setBiography($allPostPutVars['biography']);
-    $user->setAvatar($result['avatar']);
-    // return $response->withJson($user);
+    if ( $args['id'] == $accessTokenId) {
+      // return $response->withJson($accessTokenId);
+      $allPostPutVars = $request->getParsedBody();
 
-    $sql = $this->db->prepare("UPDATE `profiles` SET `name`=?, `surname`=?, `adress`=?, `city`=?, `country`=?, `zipCode`=?, `email`=?, `phone`=?, `biography`=?  WHERE id = ". $result['id']);
-    $nameValue = $user->getName();
-    $surnnameValue = $user->getSurname();
-    $adressValue = $user->getAdress();
-    $cityValue = $user->getCity();
-    $countryValue = $user->getCountry();
-    $zipCodeValue = $user->getZipCode();
-    $emailValue = $user->getEmail();
-    $phoneValue = $user->getPhone();
-    $biographyValue = $user->getBiography();
+      $sql = $this->db->prepare("SELECT users.id,users.user,profiles.avatar FROM users JOIN profiles ON users.id = profiles.id WHERE users.id = ". $accessTokenId);
+      $sql->execute();
+      $result = $sql->fetch();
 
-    if ( false ) {
-      $responseUpdate['success'] = false;
-      $responseUpdate['message'] = "La contraeña tiene que tener al menos 6 caracteres";
-    } else {
-      try {
-        $this->db->beginTransaction();
-        // Update in Users table
-        $sql->execute([
-          $nameValue,
-          $surnnameValue,
-          $adressValue,
-          $cityValue,
-          $countryValue,
-          $zipCodeValue,
-          $emailValue,
-          $phoneValue,
-          $biographyValue
-        ]);
-        if( $sql->affected_rows >= 0 ){
-          $responseUpdate['success'] = true;
-          $responseUpdate['message'] = "Perfil actualizado correctamente";
-          $responseUpdate['userProfile'] = $user;
-        } else {
+      $user =  new UserProfileEntity($result['id']);
+      $user->setUser($result['user']);
+      $user->setName($allPostPutVars['name']);
+      $user->setSurname($allPostPutVars['surname']);
+      $user->setAdress($allPostPutVars['adress']);
+      $user->setCity($allPostPutVars['city']);
+      $user->setCountry($allPostPutVars['country']);
+      $user->setZipCode($allPostPutVars['zipCode']);
+      $user->setEmail($allPostPutVars['email']);
+      $user->setPhone($allPostPutVars['phone']);
+      $user->setBiography($allPostPutVars['biography']);
+      $user->setAvatar($result['avatar']);
+      // return $response->withJson($user);
+
+      $sql = $this->db->prepare("UPDATE `profiles` SET `name`=?, `surname`=?, `adress`=?, `city`=?, `country`=?, `zipCode`=?, `email`=?, `phone`=?, `biography`=?  WHERE id = ". $result['id']);
+      $nameValue = $user->getName();
+      $surnnameValue = $user->getSurname();
+      $adressValue = $user->getAdress();
+      $cityValue = $user->getCity();
+      $countryValue = $user->getCountry();
+      $zipCodeValue = $user->getZipCode();
+      $emailValue = $user->getEmail();
+      $phoneValue = $user->getPhone();
+      $biographyValue = $user->getBiography();
+
+      if ( false ) {
+        $responseUpdate['success'] = false;
+        $responseUpdate['message'] = "La contraeña tiene que tener al menos 6 caracteres";
+      } else {
+        try {
+          $this->db->beginTransaction();
+          // Update in Users table
+          $sql->execute([
+            $nameValue,
+            $surnnameValue,
+            $adressValue,
+            $cityValue,
+            $countryValue,
+            $zipCodeValue,
+            $emailValue,
+            $phoneValue,
+            $biographyValue
+          ]);
+          if( $sql->affected_rows >= 0 ){
+            $responseUpdate['success'] = true;
+            $responseUpdate['message'] = "Perfil actualizado correctamente";
+            $responseUpdate['userProfile'] = $user;
+          } else {
+            $responseUpdate['success'] = false;
+            $responseUpdate['message'] = "Error al actualizar el perfil";
+          }
+          $this->db->commit();
+        } catch(PDOExecption $e) {
+          $this->db->rollback();
           $responseUpdate['success'] = false;
           $responseUpdate['message'] = "Error al actualizar el perfil";
+          // print "Error!: " . $e->getMessage() . "</br>";
         }
-        $this->db->commit();
-      } catch(PDOExecption $e) {
-        $this->db->rollback();
-        $responseUpdate['success'] = false;
-        $responseUpdate['message'] = "Error al actualizar el perfil";
-        print "Error!: " . $e->getMessage() . "</br>";
       }
+
+    } else {
+      //No coincide el user_id asociado al token con el id recibido en la peticion
+      $responseUpdate['success'] = false;
+      $responseUpdate['message'] = "No coincide el user id con el token enviado";
     }
+
     return $response->withJson($responseUpdate);
 
   }
