@@ -137,7 +137,8 @@ class UserProfileController
 
       if ( false ) {
         $responseUpdate['success'] = false;
-        $responseUpdate['message'] = "La contraeña tiene que tener al menos 6 caracteres";
+        $responseUpdate['error_description'] = "La contraeña tiene que tener al menos 6 caracteres";
+        $newResponse = $response->withJson($responseUpdate)->withStatus(400, $reasonPhrase = 'Bad Request');
       } else {
         try {
           $this->db->beginTransaction();
@@ -157,15 +158,18 @@ class UserProfileController
             $responseUpdate['success'] = true;
             $responseUpdate['message'] = "Perfil actualizado correctamente";
             $responseUpdate['userProfile'] = $user;
+            $newResponse = $response->withJson($responseUpdate);
           } else {
             $responseUpdate['success'] = false;
-            $responseUpdate['message'] = "Error al actualizar el perfil";
+            $responseUpdate['error_description'] = "Error al actualizar el perfil";
+            $newResponse = $response->withJson($responseUpdate)->withStatus(503, $reasonPhrase = 'Service Unavailable');
           }
           $this->db->commit();
         } catch(PDOExecption $e) {
           $this->db->rollback();
           $responseUpdate['success'] = false;
-          $responseUpdate['message'] = "Error al actualizar el perfil";
+          $responseUpdate['error_description'] = "Error al actualizar el perfil";
+          $newResponse = $response->withJson($responseUpdate)->withStatus(503, $reasonPhrase = 'Service Unavailable');
           // print "Error!: " . $e->getMessage() . "</br>";
         }
       }
@@ -173,10 +177,11 @@ class UserProfileController
     } else {
       //No coincide el user_id asociado al token con el id recibido en la peticion
       $responseUpdate['success'] = false;
-      $responseUpdate['message'] = "No coincide el user id con el token enviado";
+      $responseUpdate['error_description'] = "No coincide el user id con el token enviado";
+      $newResponse = $response->withJson($responseUpdate)->withStatus(401, $reasonPhrase = 'Unauthorized');
     }
 
-    return $response->withJson($responseUpdate);
+    return $newResponse;
 
   }
 
