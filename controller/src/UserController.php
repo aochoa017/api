@@ -11,11 +11,13 @@ class UserController
 {
   protected $container;
   protected $db;
+  protected $oauth2;
 
   // constructor receives container instance
   public function __construct(ContainerInterface $container) {
     $this->container = $container;
     $this->db = $this->container->db;
+    $this->oauth2 = new Oauth2($container);
   }
 
   //  public function __invoke($request, $response, $args) {
@@ -183,39 +185,79 @@ class UserController
     // return $response->withJson($user);
   }
 
+  private function getPassword($userId) {
+    $sql = $this->db->prepare("SELECT `password` FROM `users` WHERE id = '". $userId ."'");
+    $sql->execute();
+    $result = $sql->fetch();
+    return $result['password'];
+  }
+
+  public function isPasswordCorrect($clientPassword, $serverPassword) {
+    return $clientPassword == $serverPassword;
+  }
+
   public function update($request, $response, $args) {
-    $allPostPutVars = $request->getParsedBody();
-    // to access items in the container... $this->container->get('');
-    $sql = $this->db->prepare("UPDATE `users` SET `password`=? WHERE id = ". $args['id']);
-    $passwordValue = $allPostPutVars['password'];
-    // $responseUpdate['password'] = $passwordValue;
-    // $responseUpdate['passwordLeng'] = strlen($passwordValue);
-    if ( strlen($passwordValue) < 6 ) {
-      $responseUpdate['success'] = false;
-      $responseUpdate['message'] = "La contraeña tiene que tener al menos 6 caracteres";
-    } else {
-      try {
-        $this->db->beginTransaction();
-        // Update in Users table
-        $sql->execute([
-          $passwordValue
-        ]);
-        if( $sql->rowCount() >= 0 ){
-          $responseUpdate['success'] = true;
-          $responseUpdate['message'] = "Contraseña actualizada correctamente";
-        } else {
+
+    $accessTokenHeader = $request->getHeaderLine('Authorization');
+    $accessTokenId = $this->oauth2->userIdAccessTokenFromHeader($accessTokenHeader);
+
+    if ( $args['id'] == $accessTokenId) {
+
+      $allPostPutVars = $request->getParsedBody();
+      $newPasswordValue = $allPostPutVars['newPassword'];
+      $oldPasswordValue = $allPostPutVars['oldPassword'];
+      $responseUpdate['oldPasswordValue'] = $oldPasswordValue;
+      $responseUpdate['accessTokenId'] = $this->getPassword($accessTokenId);
+      $responseUpdate['boolean'] = $this->isPasswordCorrect($oldPasswordValue, $this->getPassword($accessTokenId));
+
+      if ( $this->isPasswordCorrect($oldPasswordValue, $this->getPassword($accessTokenId)) ) {
+
+        $sql = $this->db->prepare("UPDATE `users` SET `password`=? WHERE id = ". $accessTokenId);
+        // $responseUpdate['password'] = $passwordValue;
+        // $responseUpdate['passwordLeng'] = strlen($passwordValue);
+        if ( strlen($newPasswordValue) < 6 ) {
           $responseUpdate['success'] = false;
-          $responseUpdate['message'] = "Error al cambiar la contraseña";
+          $responseUpdate['error_description'] = "La contraeña tiene que tener al menos 6 caracteres";
+          $newResponse = $response->withJson($responseUpdate)->withStatus(400, $reasonPhrase = 'Bad Request');
+        } else {
+          try {
+            $this->db->beginTransaction();
+            // Update in Users table
+            $sql->execute([
+              $newPasswordValue
+            ]);
+            if( $sql->rowCount() >= 0 ){
+              $responseUpdate['success'] = true;
+              $responseUpdate['message'] = "Contraseña actualizada correctamente";
+              $newResponse = $response->withJson($responseUpdate);
+            } else {
+              $responseUpdate['success'] = false;
+              $responseUpdate['error_description'] = "Error al cambiar la contraseña";
+              $newResponse = $response->withJson($responseUpdate)->withStatus(503, $reasonPhrase = 'Service Unavailable');
+            }
+            $this->db->commit();
+          } catch(PDOExecption $e) {
+            $this->db->rollback();
+            $responseUpdate['success'] = false;
+            $responseUpdate['error_description'] = "Error al cambiar la contraseña";
+            $newResponse = $response->withJson($responseUpdate)->withStatus(503, $reasonPhrase = 'Service Unavailable');
+            // print "Error!: " . $e->getMessage() . "</br>";
+          }
         }
-        $this->db->commit();
-      } catch(PDOExecption $e) {
-        $this->db->rollback();
+
+      } else {
         $responseUpdate['success'] = false;
-        $responseUpdate['message'] = "Error al cambiar la contraseña";
-        print "Error!: " . $e->getMessage() . "</br>";
+        $responseUpdate['error_description'] = "La contraseña actual no es correcta";
+        $newResponse = $response->withJson($responseUpdate)->withStatus(400, $reasonPhrase = 'Bad Request');
       }
+
+    } else {
+      $responseUpdate['success'] = false;
+      $responseUpdate['error_description'] = "No coincide el user id con el token enviado";
+      $newResponse = $response->withJson($responseUpdate)->withStatus(401, $reasonPhrase = 'Unauthorized');
     }
-    return $response->withJson($responseUpdate);
+
+    return $newResponse;
   }
 
   public function delete($request, $response, $args) {

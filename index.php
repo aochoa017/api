@@ -55,7 +55,7 @@ $app->get('/users', Controller\UserController::class . ':all')->setName('users')
 $app->get('/user/{id}', Controller\UserController::class . ':findById');
 $app->get('/user/find/{user}', Controller\UserController::class . ':findByUser')->setName('findByUser');
 $app->post('/user', Controller\UserController::class . ':create');
-$app->put('/user/{id}', Controller\UserController::class . ':update');
+$app->put('/user/{id}', Controller\UserController::class . ':update')->add($authorization);
 $app->delete('/user/{id}', Controller\UserController::class . ':delete');
 
 $app->get('/profiles', Controller\UserProfileController::class . ':all')->setName('profiles')->add($authorization);
