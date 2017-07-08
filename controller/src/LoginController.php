@@ -62,6 +62,8 @@ class LoginController
 
         $path = "/api/token";
         $postFields = array(
+	      	"client_id" => "social",
+	      	"client_secret" => "secret",
           "code" => $curlResponse['response']->code,
         	"grant_type" => "authorization_code"
         );
