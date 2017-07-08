@@ -57,25 +57,46 @@ class LoginController
       $curlRequest->addContextOption(CURLOPT_CUSTOMREQUEST, "POST");
       $curlRequest->addContextOption(CURLOPT_URL, URL_BASE.$path);
       $curlResponse = $curlRequest->sendCurlRequest();
-
+// print_r($curlResponse['response']);
       if ( $curlResponse['success'] ) {
 
-        $userProfile =  new UserProfileEntity($result['id']);
-        $userProfile->setUser($result['user']);
-        $userProfile->setName($result['name']);
-        $userProfile->setSurname($result['surname']);
-        $userProfile->setAdress($result['adress']);
-        $userProfile->setCity($result['city']);
-        $userProfile->setCountry($result['country']);
-        $userProfile->setZipCode($result['zipCode']);
-        $userProfile->setEmail($result['email']);
-        $userProfile->setPhone($result['phone']);
-        $userProfile->setBiography($result['biography']);
-        $userProfile->setAvatar($result['avatar']);
+        $path = "/api/token";
+        $postFields = array(
+          "code" => $curlResponse['response']->code,
+        	"grant_type" => "authorization_code"
+        );
 
-        $responseLogin['success'] = $curlResponse['success'];
-        $responseLogin['token'] = $curlResponse['response']->response;
-        $responseLogin['user'] = $userProfile;
+        $curlRequest = new CurlRequest();
+        $curlRequest->addContextOption(CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        $curlRequest->addContextOption(CURLOPT_USERPWD, "social:secret");
+        $curlRequest->addContextOption(CURLOPT_POSTFIELDS, json_encode($postFields));
+        $curlRequest->addContextOption(CURLOPT_CUSTOMREQUEST, "POST");
+        $curlRequest->addContextOption(CURLOPT_URL, URL_BASE.$path);
+        $curlResponse = $curlRequest->sendCurlRequest();
+
+        if ( $curlResponse['success'] ) {
+
+          $userProfile =  new UserProfileEntity($result['id']);
+          $userProfile->setUser($result['user']);
+          $userProfile->setName($result['name']);
+          $userProfile->setSurname($result['surname']);
+          $userProfile->setAdress($result['adress']);
+          $userProfile->setCity($result['city']);
+          $userProfile->setCountry($result['country']);
+          $userProfile->setZipCode($result['zipCode']);
+          $userProfile->setEmail($result['email']);
+          $userProfile->setPhone($result['phone']);
+          $userProfile->setBiography($result['biography']);
+          $userProfile->setAvatar($result['avatar']);
+
+          $responseLogin['success'] = $curlResponse['success'];
+          $responseLogin['token'] = $curlResponse['response'];
+          $responseLogin['user'] = $userProfile;
+
+        } else {
+          $responseLogin['success'] = false;
+          $responseLogin['error'] = "Algo ha ido mal con el endpoint del token (2º PARTE)";
+        }
       } else {
         $responseLogin['success'] = false;
         $responseLogin['error'] = "Algo ha ido mal con el endpoint del token";

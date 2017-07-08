@@ -111,23 +111,25 @@ final class Authorize implements Routes\RouteCallbackInterface
 
         $code = substr($oauth2Response->getHttpHeader('Location'), strpos($oauth2Response->getHttpHeader('Location'), 'code=')+5, 40);
         // print_r($code);
-
-        $path = "/api/token";
-        $postFields = array(
-          "code" => $code,
-        	"grant_type" => "authorization_code"
-        );
-
-        $curlRequest = new CurlRequest();
-        $curlRequest->addContextOption(CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        $curlRequest->addContextOption(CURLOPT_USERPWD, "social:secret");
-        $curlRequest->addContextOption(CURLOPT_POSTFIELDS, json_encode($postFields));
-        $curlRequest->addContextOption(CURLOPT_CUSTOMREQUEST, "POST");
-        $curlRequest->addContextOption(CURLOPT_URL, URL_BASE.$path);
-        $curlResponse = $curlRequest->sendCurlRequest();
-
-        // print_r($curlResponse);
-        return $response->withJson($curlResponse);
-        // return Http\ResponseBridge::fromOAuth2($oauth2Response);
+        $respuesta['code'] = $code;
+        $respuesta['success'] = true;
+        return $response->withJson($respuesta);
+        // $path = "/api/token";
+        // $postFields = array(
+        //   "code" => $code,
+        // 	"grant_type" => "authorization_code"
+        // );
+        //
+        // $curlRequest = new CurlRequest();
+        // $curlRequest->addContextOption(CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        // $curlRequest->addContextOption(CURLOPT_USERPWD, "social:secret");
+        // $curlRequest->addContextOption(CURLOPT_POSTFIELDS, json_encode($postFields));
+        // $curlRequest->addContextOption(CURLOPT_CUSTOMREQUEST, "POST");
+        // $curlRequest->addContextOption(CURLOPT_URL, URL_BASE.$path);
+        // $curlResponse = $curlRequest->sendCurlRequest();
+        //
+        // // print_r($curlResponse);
+        // return $response->withJson($curlResponse);
+        // // return Http\ResponseBridge::fromOAuth2($oauth2Response);
     }
 }
