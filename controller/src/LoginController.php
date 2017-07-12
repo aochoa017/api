@@ -26,12 +26,12 @@ class LoginController
     $sql = $this->db->prepare("SELECT * FROM users JOIN profiles ON users.id = profiles.id WHERE users.user = '" .$userPost. "' AND users.password = '" .$passwordPost. "' ");
     $sql->execute();
     $resultAll = $sql->fetchAll();
-    $result = $resultAll[0];
 
     $responseLogin = Array();
 
     if ( count($resultAll) == 1 ) {
 
+      $result = $resultAll[0];
       // $path = $this->container->get('router')->pathFor('token');
       $path = $this->container->get('router')->pathFor('authorize');
       $path .= "?user_id=".$result['id'];
@@ -94,21 +94,26 @@ class LoginController
           $responseLogin['success'] = $curlResponse['success'];
           $responseLogin['token'] = $curlResponse['response'];
           $responseLogin['user'] = $userProfile;
+          $newResponse = $response->withJson($responseLogin);
 
         } else {
           $responseLogin['success'] = false;
-          $responseLogin['error'] = "Algo ha ido mal con el endpoint del token (2º PARTE)";
+          $responseLogin['error_description'] = "Algo ha ido mal con el endpoint del token (2º PARTE)";
+          $newResponse = $response->withJson($responseLogin)->withStatus(503, $reasonPhrase = 'Service Unavailable');
         }
       } else {
         $responseLogin['success'] = false;
-        $responseLogin['error'] = "Algo ha ido mal con el endpoint del token";
+        $responseLogin['error_description'] = "Algo ha ido mal con el endpoint del token";
+        $newResponse = $response->withJson($responseLogin)->withStatus(500, $reasonPhrase = 'Server Error');
       }
     } else {
       $responseLogin['success'] = false;
-      $responseLogin['error'] = "Usuario y/o contraseña erroneos";
+      $responseLogin['error_description'] = "Usuario y/o contraseña erroneos";
+      $newResponse = $response->withJson($responseLogin)->withStatus(401, $reasonPhrase = 'Unauthorized');
     }
 
-    return $response->withJson($responseLogin);
+    // return $response->withJson($responseLogin);
+    return $newResponse;
   }
 
 }
