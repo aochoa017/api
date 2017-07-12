@@ -105,7 +105,7 @@ class UserController
 
       $sql = $this->db->prepare("INSERT INTO `users`(user, password, dateCreated) VALUES (?,?,?)");
       $userValue = $allPostPutVars['user'];
-      $passwordValue = $allPostPutVars['password'];
+      $passwordValue = md5($allPostPutVars['password']);
       $dateCreatedValue = date("Y-m-d H:i:s");
 
       $sql2 = $this->db->prepare("INSERT INTO `profiles`(`id`, `name`, `surname`, `adress`, `city`, `country`, `zipCode`, `email`, `phone`, `biography`) VALUES (?,?,?,?,?,?,?,?,?,?)");
@@ -204,11 +204,11 @@ class UserController
     if ( $args['id'] == $accessTokenId) {
 
       $allPostPutVars = $request->getParsedBody();
-      $newPasswordValue = $allPostPutVars['newPassword'];
-      $oldPasswordValue = $allPostPutVars['oldPassword'];
-      $responseUpdate['oldPasswordValue'] = $oldPasswordValue;
-      $responseUpdate['accessTokenId'] = $this->getPassword($accessTokenId);
-      $responseUpdate['boolean'] = $this->isPasswordCorrect($oldPasswordValue, $this->getPassword($accessTokenId));
+      $newPasswordValue = md5($allPostPutVars['newPassword']);
+      $oldPasswordValue = md5($allPostPutVars['oldPassword']);
+      // $responseUpdate['oldPasswordValue'] = $oldPasswordValue;
+      // $responseUpdate['accessTokenId'] = $this->getPassword($accessTokenId);
+      // $responseUpdate['boolean'] = $this->isPasswordCorrect($oldPasswordValue, $this->getPassword($accessTokenId));
 
       if ( $this->isPasswordCorrect($oldPasswordValue, $this->getPassword($accessTokenId)) ) {
 

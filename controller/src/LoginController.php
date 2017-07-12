@@ -21,7 +21,7 @@ class LoginController
   public function login($request, $response, $args) {
     $allPostPutVars = $request->getParsedBody();
     $userPost = $allPostPutVars['user'];
-    $passwordPost = $allPostPutVars['password'];
+    $passwordPost = md5($allPostPutVars['password']);
 
     $sql = $this->db->prepare("SELECT * FROM users JOIN profiles ON users.id = profiles.id WHERE users.user = '" .$userPost. "' AND users.password = '" .$passwordPost. "' ");
     $sql->execute();
