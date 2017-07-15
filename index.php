@@ -36,7 +36,8 @@ $storage = new Storage\Pdo($container['db']);
 $server = new OAuth2\Server(
     $storage,
     [
-      'access_lifetime' => 86400,// 900 = 15 minutos
+      'access_lifetime' => 86400,// 1 dia
+      'refresh_token_lifetime' => 259200,// 3 dias
     ],
     [
       new GrantType\ClientCredentials($storage),
