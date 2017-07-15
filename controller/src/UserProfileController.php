@@ -74,7 +74,7 @@ class UserProfileController
     $user->setPhone($result['phone']);
     $user->setBiography($result['biography']);
     $user->setAvatar( ($result['avatar'] == "") ? "" : AVATAR_URL_BASE.$result['avatar'] );
-    return $response->withJson($user);
+    return $response->withHeader('Cache-Control', 'no-cache')->withJson($user);
   }
 
   public function findByUser($request, $response, $args) {
