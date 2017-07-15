@@ -74,6 +74,8 @@ $app->put('/contacts/{id}', Controller\ContactController::class . ':update');
 $app->post('/contacts/accept/{id}', Controller\ContactController::class . ':acceptContact');
 $app->delete('/contacts/{id}', Controller\ContactController::class . ':delete');
 
+$app->delete('/private/database/{type}', Controller\DatabaseController::class . ':delete');
+
 $app->get('/users1', function ($request, $response, $args) {
   $sql = $this->db->prepare("SELECT * FROM `users` WHERE id = 1");
   $sql->execute();
