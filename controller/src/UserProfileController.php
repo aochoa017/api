@@ -73,7 +73,7 @@ class UserProfileController
     $user->setEmail($result['email']);
     $user->setPhone($result['phone']);
     $user->setBiography($result['biography']);
-    $user->setAvatar($result['avatar']);
+    $user->setAvatar(AVATAR_URL_BASE.$result['avatar']);
     return $response->withJson($user);
   }
 
