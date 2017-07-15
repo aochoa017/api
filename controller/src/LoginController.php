@@ -89,7 +89,7 @@ class LoginController
           $userProfile->setEmail($result['email']);
           $userProfile->setPhone($result['phone']);
           $userProfile->setBiography($result['biography']);
-          $userProfile->setAvatar($result['avatar']);
+          $userProfile->setAvatar( ($result['avatar'] == "") ? "" : AVATAR_URL_BASE.$result['avatar'] );
 
           $responseLogin['success'] = $curlResponse['success'];
           $responseLogin['token'] = $curlResponse['response'];
