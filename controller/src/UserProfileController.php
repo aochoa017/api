@@ -50,7 +50,7 @@ class UserProfileController
       $user->setEmail($result[$i]['email']);
       $user->setPhone($result[$i]['phone']);
       $user->setBiography($result[$i]['biography']);
-      $user->setAvatar($result[$i]['avatar']);
+      $user->setAvatar(AVATAR_URL_BASE.$result[$i]['avatar']);
       $users[] = $user;
     }
       // return "hola";
@@ -73,7 +73,7 @@ class UserProfileController
     $user->setEmail($result['email']);
     $user->setPhone($result['phone']);
     $user->setBiography($result['biography']);
-    $user->setAvatar(AVATAR_URL_BASE.$result['avatar']);
+    $user->setAvatar( ($result['avatar'] == "") ? "" : AVATAR_URL_BASE.$result['avatar'] );
     return $response->withJson($user);
   }
 
@@ -92,7 +92,7 @@ class UserProfileController
     $user->setEmail($result['email']);
     $user->setPhone($result['phone']);
     $user->setBiography($result['biography']);
-    $user->setAvatar($result['avatar']);
+    $user->setAvatar( ($result['avatar'] == "") ? "" : AVATAR_URL_BASE.$result['avatar']  );
     return $response->withJson($user);
     // return $user;
   }
