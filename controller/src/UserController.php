@@ -87,13 +87,168 @@ class UserController
     return $result;
   }
 
+  public function newUser($request, $response, $args) {
+
+    $allPostPutVars = $request->getParsedBody();
+    $user = $allPostPutVars['user'];
+    $email = $allPostPutVars['email'];
+
+    $responseCreate = array();
+
+    if ( $this->columnExist("profiles","email",$email) ) {
+
+      $responseCreate['success'] = false;
+      $responseCreate['error_description'] = "El email asociado ya existe";
+      $newResponse = $response->withJson($responseCreate)->withStatus(400, $reasonPhrase = 'Bad Request');
+
+    } elseif ( $this->columnExist("users","user",$user) || $this->columnExist("usersTemp","user",$user) ) {
+
+      $responseCreate['success'] = false;
+      $responseCreate['error_description'] = "El usuario ya existe";
+      $newResponse = $response->withJson($responseCreate)->withStatus(400, $reasonPhrase = 'Bad Request');
+
+    } else {
+
+      $responseCreate['success'] = true;
+      $expires = date("Y-m-d H:i:s");
+      $expires = date('Y-m-d H:i:s', strtotime($expires . ' +1 day'));
+      $token = sha1(uniqid($user, true));
+
+      try {
+        $this->db->beginTransaction();
+        $sql = $this->db->prepare("INSERT INTO `usersTemp`(user, email, expires, token) VALUES (?,?,?,?)");
+        $sql->execute([
+          $user,
+          $email,
+          $expires,
+          $token
+        ]);
+        if( $sql->rowCount() >= 0 ){
+          $responseCreate['success'] = true;
+          $responseCreate['message'] = "Usuario nuevo creado correctamente. Confirma el usuario antes de 24 horas en el email proporcionado.";
+          $newResponse = $response->withJson($responseCreate);
+        } else {
+          $responseCreate['success'] = false;
+          $responseCreate['error_description'] = "Error al registar nuevo usuario";
+          $newResponse = $response->withJson($responseCreate)->withStatus(503, $reasonPhrase = 'Service Unavailable');
+        }
+        $this->db->commit();
+      } catch(PDOExecption $e) {
+        $this->db->rollback();
+        $responseCreate['success'] = false;
+        $responseCreate['error_description'] = "Error al registar nuevo usuario";
+        $newResponse = $response->withJson($responseCreate)->withStatus(503, $reasonPhrase = 'Service Unavailable');
+      }
+
+    }
+
+    return $newResponse;
+
+  }
+
+  private function isDateTimeFuture($table,$column,$value,$datetime) {
+    $sql = $this->db->prepare("SELECT $datetime FROM `$table` WHERE ".$column." = '". $value ."'");
+    $sql->execute();
+    $result = $sql->fetch();
+    if ($result[$datetime] > date("Y-m-d H:i:s")) {
+      $result = true;
+    } else {
+      $result = false;
+    }
+    return $result;
+  }
+
+  public function isNewUserTokenValid($request, $response, $args) {
+
+    $token = $args['token'];
+
+    if (preg_match('/^[0-9A-F]{40}$/i', $token)) {
+
+      if ( $this->columnExist("usersTemp","token",$token) ){
+
+        if($this->isDateTimeFuture("usersTemp","token",$token,"expires")) {
+
+          $responseCreate['success'] = true;
+          $newResponse = $response->withJson($responseCreate);
+
+        } else{
+          $responseCreate['success'] = false;
+          $responseCreate['error_description'] = "El token de verificación se ha caducado";
+          $newResponse = $response->withJson($responseCreate)->withStatus(400, $reasonPhrase = 'Bad Request');
+        }
+
+      } else {
+        $responseCreate['success'] = false;
+        $responseCreate['error_description'] = "El token de verificación se ha usado ya o no existe";
+        $newResponse = $response->withJson($responseCreate)->withStatus(400, $reasonPhrase = 'Bad Request');
+      }
+
+    } else {
+      $responseCreate['success'] = false;
+      $responseCreate['error_description'] = "El token de verificación no es correcto";
+      $newResponse = $response->withJson($responseCreate)->withStatus(400, $reasonPhrase = 'Bad Request');
+    }
+
+    return $newResponse;
+
+  }
+
+  public function newUserToken($request, $response, $args) {
+
+    $token = $args['token'];
+
+    if (preg_match('/^[0-9A-F]{40}$/i', $token)) {
+
+      //verificar que es correcto
+      if ( $this->columnExist("usersTemp","token",$token) ){
+
+        if($this->isDateTimeFuture("usersTemp","token",$token,"expires")){
+
+          //Seleccionamos el user y el email
+          $sql = $this->db->prepare("SELECT * FROM `usersTemp` WHERE token = '". $token ."'");
+          $sql->execute();
+          $result = $sql->fetch();
+          // $user = $result['user'];
+          // $email = $result['email'];
+          $allPostPutVars = $request->getParsedBody();
+          $allPostPutVars['user'] = $result['user'];
+          $allPostPutVars['email'] = $result['email'];
+          // $request->withParsedBody($allPostPutVars);
+
+          // return $response->withJson($request->withParsedBody($allPostPutVars)->getParsedBody()); die(0);
+
+          return $this->create($request->withParsedBody($allPostPutVars), $response, $args);
+
+        } else{
+          $responseCreate['success'] = false;
+          $responseCreate['error_description'] = "El token de verificación se ha caducado";
+          $newResponse = $response->withJson($responseCreate)->withStatus(400, $reasonPhrase = 'Bad Request');
+        }
+
+      } else {
+        $responseCreate['success'] = false;
+        $responseCreate['error_description'] = "El token de verificación se ha usado ya o no existe";
+        $newResponse = $response->withJson($responseCreate)->withStatus(400, $reasonPhrase = 'Bad Request');
+      }
+
+    }
+    else {
+      $responseCreate['success'] = false;
+      $responseCreate['error_description'] = "El token de verificación no es correcto";
+      $newResponse = $response->withJson($responseCreate)->withStatus(400, $reasonPhrase = 'Bad Request');
+    }
+
+    return $newResponse;
+
+  }
+
   public function create($request, $response, $args) {
     $allPostPutVars = $request->getParsedBody();
     $responseCreate = array();
-    if ( $this->columnExist(profiles,email,$allPostPutVars['email']) ) {
+    if ( $this->columnExist("profiles","email",$allPostPutVars['email']) ) {
       $responseCreate['success'] = false;
       $responseCreate['message'] = "El email asociado ya existe";
-    } elseif ( $this->columnExist(users,user,$allPostPutVars['user']) ) {
+    } elseif ( $this->columnExist("users","user",$allPostPutVars['user']) ) {
       $responseCreate['success'] = false;
       $responseCreate['message'] = "El usuario ya existe";
     } else {

@@ -56,6 +56,9 @@ $app->get('/users', Controller\UserController::class . ':all')->setName('users')
 $app->get('/user/{id}', Controller\UserController::class . ':findById');
 $app->get('/user/find/{user}', Controller\UserController::class . ':findByUser')->setName('findByUser');
 $app->post('/user', Controller\UserController::class . ':create');
+$app->post('/user/new', Controller\UserController::class . ':newUser');
+$app->post('/user/new/{token}', Controller\UserController::class . ':newUserToken');
+$app->get('/user/new/{token}', Controller\UserController::class . ':isNewUserTokenValid');
 $app->put('/user/{id}', Controller\UserController::class . ':update')->add($authorization);
 $app->delete('/user/{id}', Controller\UserController::class . ':delete');
 
