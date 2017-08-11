@@ -59,6 +59,14 @@ class StudentEntity implements \JsonSerializable {
     $this->surnameSecond = $surnameSecond;
   }
 
+  public function getName() {
+    return $this->name;
+  }
+
+  public function setName($name) {
+    $this->name = $name;
+  }
+
   public function jsonSerialize() {
     return [
       'id' => $this->id,
