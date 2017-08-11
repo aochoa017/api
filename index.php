@@ -101,27 +101,4 @@ $app->get('/users1', function ($request, $response, $args) {
 */
 });
 
-$app->map(['GET', 'POST'], '/books', function ($request, $response, $args) {
-  $writeArgs = "";
-  foreach ($args as $key => $value) {
-    $writeArgs .= $key.": ".$value."</br>";
-  }
-    return $response->write("Hello, BOOKS \n".$args['param1']);
-});
-
-$app->post('/postbooks', function ($request, $response, $args) {
-  //GET
-  // $allGetVars = $request->getQueryParams();
-  /*foreach($allGetVars as $key => $param){
-     //GET parameters list
-  }*/
-
-  //POST or PUT
-  $allPostPutVars = $request->getParsedBody();
-  foreach($allPostPutVars as $key => $param){
-     //POST or PUT parameters list
-  }
-    return $response->write($allGetVars['param1']);
-});
-
 $app->run();
