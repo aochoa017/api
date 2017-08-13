@@ -79,6 +79,18 @@ $app->delete('/contacts/{id}', Controller\ContactController::class . ':delete');
 
 $app->delete('/private/database/{type}', Controller\DatabaseController::class . ':delete');
 
+
+/**
+ * Students endpoints
+ */
+$app->get('/students', Controller\StudentController::class . ':getAllStudents');
+$app->get('/students/{id}', Controller\StudentController::class . ':getStudentById');
+$app->post('/students', Controller\StudentController::class . ':setStudent');
+$app->put('/students/{id}', Controller\StudentController::class . ':putStudent');
+$app->delete('/students/{id}', Controller\StudentController::class . ':deleteStudent');
+
+
+
 $app->get('/users1', function ($request, $response, $args) {
   $sql = $this->db->prepare("SELECT * FROM `users` WHERE id = 1");
   $sql->execute();
